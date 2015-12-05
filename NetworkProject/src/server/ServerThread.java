@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
 
 public class ServerThread extends Thread{
     //Constants
-    private final int BUFFER_SIZE = 1000000;
+    private final int BUFFER_SIZE = 1024;
     //Variables
     private SocketChannel client;
     private String remoteAddress;
@@ -48,20 +49,32 @@ public class ServerThread extends Thread{
     public void run(){
         //Read the buffer
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        File file = new File("/Users/starwers13/NetBeansProjects/test.txt");
+        RandomAccessFile aFile = null;
         FileOutputStream fos = null;
         FileChannel fc = null;
+        int byteRead = 0;
         System.out.println("Openening Thread server : " + this.getName());
         
         try{
-            fos = new FileOutputStream(file);
-            fc = fos.getChannel();
+            aFile = new RandomAccessFile("/Users/starwers13/NetBeansProjects/test.jpg", "rw");
+            fc = aFile.getChannel();
+            
+            while((byteRead = client.read(buffer)) > 0) {
+                buffer.flip();
+                fc.write(buffer);
+                buffer.clear();
+            
+                System.out.println("Size Buffer = " + byteRead);
+                System.out.println("Receiving...");
+            }
         }
         catch(FileNotFoundException fe){
-            System.out.println("Impossible to open the output file " + file.getAbsolutePath());
+            fe.printStackTrace();
+        } catch (IOException ex) {
+            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        int bufferRead = -1;
+        /*int bufferRead = -1;
         
         try{
             bufferRead = client.read(buffer);
@@ -81,7 +94,7 @@ public class ServerThread extends Thread{
         } 
         catch (IOException ex) {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        }
         
         while(bufferRead != -1 && buffer.hasRemaining()){
             try{
@@ -102,7 +115,7 @@ public class ServerThread extends Thread{
             catch(IOException e){
                 System.out.println("Error while reading the buffer " + this.remoteAddress);
             } 
-        }
+        }*/
         
         System.out.println("Closing Thread server : " + this.getName());
     }
