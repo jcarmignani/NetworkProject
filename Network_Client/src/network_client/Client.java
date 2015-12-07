@@ -6,6 +6,7 @@
 package network_client;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -18,6 +19,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  *
@@ -29,7 +32,7 @@ public class Client {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException{
         SocketChannel client=SocketChannel.open();
         //client.configureBlocking(false);
         boolean status = client.connect(new InetSocketAddress("127.0.0.1", nbrPort));
@@ -59,6 +62,26 @@ public class Client {
                 System.out.println("Size Buffer = " + byteRead);
                 System.out.println("Sending...");
             }
+            
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            FileInputStream fis = new FileInputStream("/Users/starwers13/Documents/stage.jpg");
+
+            byte[] dataBytes = new byte[1024];
+
+            int nread = 0; 
+            while ((nread = fis.read(dataBytes)) != -1) {
+              md.update(dataBytes, 0, nread);
+            };
+            byte[] mdbytes = md.digest();
+
+            //convert the byte to hex format method 1
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < mdbytes.length; i++) {
+              sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            System.out.println("Hex format : " + sb.toString());
+
         }
         catch (FileNotFoundException e) {
         e.printStackTrace();
