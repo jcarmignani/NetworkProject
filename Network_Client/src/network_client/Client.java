@@ -16,6 +16,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,6 +64,41 @@ public class Client {
                 System.out.println("Sending...");
             }
             
+            String hashFile = new String();
+            ByteBuffer hashBuffer = ByteBuffer.allocate(32);
+            
+            while(hashFile.isEmpty()) {
+                byteRead = client.read(hashBuffer);
+                
+                if(byteRead > 0){
+                    hashBuffer.flip();
+                    byte[] hashByte = hashBuffer.array();
+
+                    System.out.println("Size Buffer Recveived = " + byteRead);
+                    System.out.println("Receiving...");
+
+                    buffer.clear();
+                    System.out.println("OK Hash");
+                    
+                                //convert the byte to hex format method 1
+                    StringBuffer sbHash = new StringBuffer();
+                    for (int i = 0; i < hashByte.length; i++) {
+                      sbHash.append(Integer.toString((hashByte[i] & 0xff) + 0x100, 16).substring(1));
+                    }
+                    
+                    hashFile = sbHash.toString();
+                    
+                    System.out.println("Hex format Server : ");
+                    System.out.println(hashFile);
+                }
+                else{
+                    System.out.println("BLOCKED Hash");
+                }
+                System.out.println("Loop");
+            }
+            
+            System.out.println("Hex format Server : " + hashFile);
+            
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             FileInputStream fis = new FileInputStream("/Users/starwers13/Documents/stage.jpg");
 
@@ -80,7 +116,7 @@ public class Client {
               sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
             }
 
-            System.out.println("Hex format : " + sb.toString());
+            System.out.println("Hex format Check : " + sb.toString());
 
         }
         catch (FileNotFoundException e) {
@@ -89,23 +125,6 @@ public class Client {
         catch (IOException e) {
         e.printStackTrace();
         } 
-        
-        //Send the name of the file
-        //client.write(ByteBuffer.wrap(file.getName().getBytes("UTF_8")));
-        /*int byteRead = fc.read(buffer);
-        System.out.println("Size Buffer = " + byteRead);
-        System.out.println("Has Remaining = " + buffer.hasRemaining());
-
-        while((byteRead != 0 && byteRead != -1) || buffer.hasRemaining()){
-            buffer.flip();
-            client.write(buffer);
-            buffer.compact();
-            buffer.flip();
-            byteRead = client.read(buffer);
-            System.out.println("Size Buffer = " + byteRead);
-            System.out.println("Has Remaining = " + buffer.hasRemaining());
-            System.out.println("Sending...");
-        }*/
 
         System.out.println("Closing client side...");
         client.close();

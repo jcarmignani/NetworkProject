@@ -60,6 +60,9 @@ public class ServerThread extends Thread{
         MessageDigest messDigestTest = null;
         ByteBuffer bufferLast = ByteBuffer.allocate(BUFFER_SIZE);
         
+        //****************************************************
+        //********** Receiving Data from the Client **********
+        //****************************************************
         try{
             aFile = new RandomAccessFile("/Users/starwers13/NetBeansProjects/test.jpg", "rw");
             fc = aFile.getChannel();
@@ -72,7 +75,6 @@ public class ServerThread extends Thread{
             
                 System.out.println("Size Buffer = " + byteRead);
                 System.out.println("Receiving...");
-                System.out.println("Coucou...");
                 
                 //messDigest.update(buffer);
                 messDigest.update(buffer.array(), 0, byteRead);
@@ -108,49 +110,15 @@ public class ServerThread extends Thread{
         }
 
         System.out.println("Hex format : " + sb2.toString());
-        
-        /*int bufferRead = -1;
-        
-        try{
-            bufferRead = client.read(buffer);
-        } 
-        catch (IOException ex) {
-            System.out.println("Error during reading buffer...");
-        }
-        
-        /*buffer.flip();
-        System.out.println("Reading Socket and writing file...");
-        byte[] buff = new byte[BUFFER_SIZE];
-        buffer.get(buff, 0, bufferRead);
-        System.out.println("Server said: " + new String(buff));
-        
+
+        //****************************************************
+        //*********** Sending Data from the Client ***********
+        //****************************************************  
         try {
-            fc.write(buffer);
-        } 
-        catch (IOException ex) {
+            client.write(ByteBuffer.wrap(byteData));
+        } catch (IOException ex) {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        while(bufferRead != -1 && buffer.hasRemaining()){
-            try{
-                buffer.flip();
-                fc.write(buffer);
-                buffer.compact();
-                bufferRead = client.read(buffer);
-                System.out.println("Reading Socket and writing file...");
-                System.out.println("bufferRead = " + bufferRead);
-                
-                try {
-                    Thread.sleep(4000);
-                } 
-                catch (InterruptedException ex) {
-                    Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            catch(IOException e){
-                System.out.println("Error while reading the buffer " + this.remoteAddress);
-            } 
-        }*/
         
         System.out.println("Closing Thread server : " + this.getName());
     }
